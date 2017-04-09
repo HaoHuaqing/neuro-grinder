@@ -1,7 +1,7 @@
 from flask_appbuilder import ModelView
 from flask_appbuilder.fieldwidgets import Select2Widget
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from .models import Task, Subject, side_tested, pre_after, Encounter
+from .models import Task, Subject, side_tested, pre_after, Visit
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from app import appbuilder, db
 
@@ -36,10 +36,10 @@ class TaskView(ModelView):
 
     show_template = 'appbuilder/general/model/show_cascade.html'
 
-class EncounterView(ModelView):
-    datamodel = SQLAInterface(Encounter)
+class VisitView(ModelView):
+    datamodel = SQLAInterface(Visit)
 
-    list_columns = ['subject_id', 'pre_after_id', 'task_id']
+    list_columns = ['subject', 'pre_after', 'task']
 
     show_template = 'appbuilder/general/model/show_cascade.html'
 
@@ -51,4 +51,4 @@ appbuilder.add_view(SubjectView, "Subject", icon="fa-folder-open-o", category="E
 appbuilder.add_separator("Experiment")
 appbuilder.add_view(TaskView, "Task", icon="fa-folder-open-o", category="Experiment")
 appbuilder.add_separator("Experiment")
-appbuilder.add_view(EncounterView, "Encounter", icon="fa-folder-open-o", category="Experiment")
+appbuilder.add_view(VisitView, "Visit", icon="fa-folder-open-o", category="Experiment")

@@ -44,7 +44,7 @@ class Subject(Model):
     def __repr__(self):
         return self.name
 
-class Encounter(Model):
+class Visit(Model):
     id = Column(Integer, primary_key=True)
     subject_id = Column(Integer, ForeignKey('subject.id'), nullable=False)
     subject = relationship("Subject")

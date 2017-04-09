@@ -1,5 +1,6 @@
 ## hello
-this is crud app.
+- This is crud app based on python3.5,flask,flask-appbuilder.
+- You need complete subject and task form first, then complete visit form.
 
 ## Table encounter
 subject_id(f), timestamp, side_tested, ?pre_after, task_id, csv_location
