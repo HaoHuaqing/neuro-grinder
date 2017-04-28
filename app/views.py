@@ -39,7 +39,7 @@ class TaskView(ModelView):
 class VisitView(ModelView):
     datamodel = SQLAInterface(Visit)
 
-    list_columns = ['subject', 'pre_after', 'task']
+    list_columns = ['subject', 'pre_after', 'task', 'location']
 
     show_template = 'appbuilder/general/model/show_cascade.html'
 

@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from flask_appbuilder import Model
 
 from flask_appbuilder.models.mixins import FileColumn
-
+from flask import Markup, url_for
 
 class Task(Model):
     id = Column(Integer, primary_key=True)
@@ -58,5 +58,7 @@ class Visit(Model):
     csv_location = Column(FileColumn, nullable=False)
     description = Column(String(500))
 
+    def location(self):
+        return str("C:\code\\neuro-grinder\\app\static\\uploads" + self.csv_location)
     def __repr__(self):
         return self.subject
