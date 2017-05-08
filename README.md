@@ -20,6 +20,10 @@ task_id, name, description
 - Correct the tables
 - Generate JSON-encoded .csv filenames based on queries (all pre trials for LateralReaching
 
+## Motion_EMG.py
+    Sampling, merge and standardizing EMG and Motion data.
+
+
 ## run
 Create an Admin user::
 
