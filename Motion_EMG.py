@@ -4,6 +4,7 @@ import os.path
 import pandas as pd
 import csv
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy import interpolate
 EMG_folder = os.listdir('C:\\code\\EEG_Motion\\Subject_16_EXP1\\FES_Subject_16\\')
 Motion_folder = os.listdir('C:\\code\\EEG_Motion\\Subject_16_EXP1\\Subject16_e1\\')
@@ -49,20 +50,23 @@ def title():
 
 
 def process(EMG_data, Motion_data):
-    # visual data
+    # visual trigger of EMG and Motion
     trigger1 = EMG_data[:, -1]
     trigger2 = Motion_data[:, -1]
-    # plt.subplot(2, 1, 1)
-    # plt.plot(trigger1)
-    # plt.subplot(2, 1, 2)
-    # plt.plot(trigger2)
-    # plt.show()
+    plt.subplot(2, 1, 1)
+    plt.plot(trigger1)
+    plt.title('EMG Trigger')
+    plt.subplot(2, 1, 2)
+    plt.plot(trigger2)
+    plt.title('Motion Trigger')
+    plt.show()
 
-    # capture data
+    # capture data [trigger on - 0.5s, trigger off + 1s]
     EMG_trigger_list = [i for i, v in enumerate(trigger1) if v >= 0.005]
     Motion_trigger_list = [i for i, v in enumerate(trigger2) if v >= 2]
-    EMG_data = EMG_data[EMG_trigger_list[0]:EMG_trigger_list[-1]]
-    Motion_data = Motion_data[Motion_trigger_list[0]:Motion_trigger_list[-1]]
+    print(EMG_trigger_list[0],EMG_trigger_list[-1],Motion_trigger_list[0],Motion_trigger_list[-1])
+    EMG_data = EMG_data[EMG_trigger_list[0]-963:EMG_trigger_list[-1]+1927]
+    Motion_data = Motion_data[Motion_trigger_list[0]-60:Motion_trigger_list[-1]+120]
     # print(EMG_trigger_list[-1])
 
     # EMG:1927HZ  Motion:120HZ  1927/120 = 16
@@ -93,9 +97,28 @@ def process(EMG_data, Motion_data):
     Merged_data = np.concatenate((EMG_processed_data, Motion_processed_data), axis=1)
     return Merged_data
 
+def mkdir(path):
+    # make new folder for FR, LR
+    import os
+
+    path = path.strip()
+    path = path.rstrip("\\")
+
+    isExists = os.path.exists(path)
+    if not isExists:
+        print(path + ' success created')
+        os.makedirs(path)
+        return True
+    else:
+        print(path + ' already exist')
+        return False
 
 if __name__ == "__main__":
     FR_num = 10
+    FR_folder = 'C:\\code\\EEG_Motion\\FR\\'
+    mkdir(FR_folder)
+    LR_folder = 'C:\\code\\EEG_Motion\\LR\\'
+    mkdir(LR_folder)
     if len(EMG_folder) == len(Motion_folder):
         # data belong to FR and LR
         for count in range(FR_num):
@@ -103,7 +126,7 @@ if __name__ == "__main__":
             Motion_data = loadMotion((Motion_folder[count]))
             Merged_title = title()
             Merged_data = process(EMG_data, Motion_data)
-            with open('EMG_Motion_FR' + str(count) + '.csv', 'w', newline='') as f:
+            with open('C:\\code\\EEG_Motion\\FR\\EMG_Motion_FR' + str(count) + '.csv', 'w', newline='') as f:
                 f_csv = csv.writer(f)
                 f_csv.writerow(Merged_title)
                 f_csv.writerows(Merged_data)
@@ -114,7 +137,7 @@ if __name__ == "__main__":
             Motion_data = loadMotion((Motion_folder[count]))
             Merged_title = title()
             Merged_data = process(EMG_data, Motion_data)
-            with open('EMG_Motion_LR' + str(count - FR_num) + '.csv', 'w', newline='') as f:
+            with open('C:\\code\\EEG_Motion\\LR\\EMG_Motion_LR' + str(count - FR_num) + '.csv', 'w', newline='') as f:
                 f_csv = csv.writer(f)
                 f_csv.writerow(Merged_title)
                 f_csv.writerows(Merged_data)
