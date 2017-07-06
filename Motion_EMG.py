@@ -50,16 +50,9 @@ def title():
 
 
 def process(EMG_data, Motion_data):
-    # visual trigger of EMG and Motion
+
     trigger1 = EMG_data[:, -1]
     trigger2 = Motion_data[:, -1]
-    plt.subplot(2, 1, 1)
-    plt.plot(trigger1)
-    plt.title('EMG Trigger')
-    plt.subplot(2, 1, 2)
-    plt.plot(trigger2)
-    plt.title('Motion Trigger')
-    plt.show()
 
     # capture data [trigger on - 0.5s, trigger off + 1s]
     EMG_trigger_list = [i for i, v in enumerate(trigger1) if v >= 0.005]
@@ -68,6 +61,19 @@ def process(EMG_data, Motion_data):
     EMG_data = EMG_data[EMG_trigger_list[0]-963:EMG_trigger_list[-1]+1927]
     Motion_data = Motion_data[Motion_trigger_list[0]-60:Motion_trigger_list[-1]+120]
     # print(EMG_trigger_list[-1])
+
+    # visual trigger of EMG and Motion
+    plt.subplot(2, 1, 1)
+    plt.plot(trigger1)
+    plt.scatter(EMG_trigger_list[0], 0, c='red')
+    plt.scatter(EMG_trigger_list[-1], 0, c='red')
+    plt.title('EMG Trigger')
+    plt.subplot(2, 1, 2)
+    plt.plot(trigger2)
+    plt.scatter(Motion_trigger_list[0], 0, c='red')
+    plt.scatter(Motion_trigger_list[-1], 0, c='red')
+    plt.title('Motion Trigger')
+    plt.show()
 
     # EMG:1927HZ  Motion:120HZ  1927/120 = 16
     # resample Motion to 1000hz
@@ -78,6 +84,7 @@ def process(EMG_data, Motion_data):
     Time_data = np.array([[i / 1000.0 for i in range(EMG_processed_data.shape[1])]])
     EMG_processed_data = np.concatenate((EMG_processed_data, Time_data), axis=0)
     EMG_processed_data = np.rot90(EMG_processed_data, 3)
+    print(EMG_processed_data.shape)
 
     # Motion data interpolation
     x = np.linspace(0, len(Motion_data[:, 14]), len(Motion_data[:, 14]))
@@ -94,6 +101,7 @@ def process(EMG_data, Motion_data):
         Motion_processed_data = np.concatenate((Motion_processed_data, ynew), axis=0)
     Motion_processed_data = np.rot90(Motion_processed_data, 3)
     Motion_processed_data = Motion_processed_data[:EMG_processed_data.shape[0]]
+    print(Motion_processed_data.shape)
     Merged_data = np.concatenate((EMG_processed_data, Motion_processed_data), axis=1)
     return Merged_data
 
