@@ -49,7 +49,7 @@ def title():
     return Merged_title
 
 
-def process(EMG_data, Motion_data):
+def process(EMG_data, Motion_data, count):
 
     trigger1 = EMG_data[:, -1]
     trigger2 = Motion_data[:, -1]
@@ -67,7 +67,7 @@ def process(EMG_data, Motion_data):
     plt.plot(trigger1)
     plt.scatter(EMG_trigger_list[0], 0, c='red')
     plt.scatter(EMG_trigger_list[-1], 0, c='red')
-    plt.title('EMG Trigger')
+    plt.title('EMG Trigger ' + str(count))
     plt.subplot(2, 1, 2)
     plt.plot(trigger2)
     plt.scatter(Motion_trigger_list[0], 0, c='red')
@@ -101,7 +101,11 @@ def process(EMG_data, Motion_data):
         Motion_processed_data = np.concatenate((Motion_processed_data, ynew), axis=0)
     Motion_processed_data = np.rot90(Motion_processed_data, 3)
     Motion_processed_data = Motion_processed_data[:EMG_processed_data.shape[0]]
-    print(Motion_processed_data.shape)
+    # 0 is best 
+    # 1000 is 1 second
+    print(Motion_processed_data.shape[0] - EMG_processed_data.shape[0])
+
+    EMG_processed_data = EMG_processed_data[:Motion_processed_data.shape[0]]
     Merged_data = np.concatenate((EMG_processed_data, Motion_processed_data), axis=1)
     return Merged_data
 
@@ -133,7 +137,7 @@ if __name__ == "__main__":
             EMG_data = loadEMG(EMG_folder[count])
             Motion_data = loadMotion((Motion_folder[count]))
             Merged_title = title()
-            Merged_data = process(EMG_data, Motion_data)
+            Merged_data = process(EMG_data, Motion_data, count)
             with open('C:\\code\\EEG_Motion\\FR\\EMG_Motion_FR' + str(count) + '.csv', 'w', newline='') as f:
                 f_csv = csv.writer(f)
                 f_csv.writerow(Merged_title)
@@ -144,7 +148,7 @@ if __name__ == "__main__":
             EMG_data = loadEMG(EMG_folder[count])
             Motion_data = loadMotion((Motion_folder[count]))
             Merged_title = title()
-            Merged_data = process(EMG_data, Motion_data)
+            Merged_data = process(EMG_data, Motion_data, count)
             with open('C:\\code\\EEG_Motion\\LR\\EMG_Motion_LR' + str(count - FR_num) + '.csv', 'w', newline='') as f:
                 f_csv = csv.writer(f)
                 f_csv.writerow(Merged_title)
