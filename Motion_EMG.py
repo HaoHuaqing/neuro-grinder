@@ -6,12 +6,12 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import interpolate
-EMG_folder = os.listdir('C:\\code\\EEG_Motion\\Subject_16_EXP1\\FES_Subject_16\\')
-Motion_folder = os.listdir('C:\\code\\EEG_Motion\\Subject_16_EXP1\\Subject16_e1\\')
+EMG_folder = os.listdir('C:\\code\\EEG_Motion\\FES_S05_FR\\')
+Motion_folder = os.listdir('C:\\code\\EEG_Motion\\Motion_S05\\')
 
 def loadEMG(EMG_file):
     EMG_columns = [i * 8 + 1 for i in range(8)]
-    EMG_filename = 'C:\\code\\EEG_Motion\\Subject_16_EXP1\\FES_Subject_16\\' + EMG_file
+    EMG_filename = 'C:\\code\\EEG_Motion\\FES_S05_FR\\' + EMG_file
     EMG_data = np.loadtxt(EMG_filename,  # 文件名
                           delimiter=',',  # 分隔符
                           skiprows=(36),
@@ -21,7 +21,7 @@ def loadEMG(EMG_file):
 
 def loadMotion(Motion_file):
     Motion_columns = [i for i in range(1, 16)]
-    Motion_filename = 'C:\\code\\EEG_Motion\\Subject_16_EXP1\\Subject16_e1\\' + Motion_file
+    Motion_filename = 'C:\\code\\EEG_Motion\\Motion_S05\\' + Motion_file
     Motion_data = np.loadtxt(Motion_filename,  # 文件名
                              skiprows=(9),
                              dtype=float,  # 数据类型
@@ -57,23 +57,24 @@ def process(EMG_data, Motion_data, count):
     # capture data [trigger on - 0.5s, trigger off + 1s]
     EMG_trigger_list = [i for i, v in enumerate(trigger1) if v >= 0.005]
     Motion_trigger_list = [i for i, v in enumerate(trigger2) if v >= 2]
-    print(EMG_trigger_list[0],EMG_trigger_list[-1],Motion_trigger_list[0],Motion_trigger_list[-1])
-    EMG_data = EMG_data[EMG_trigger_list[0]-963:EMG_trigger_list[-1]+1927]
-    Motion_data = Motion_data[Motion_trigger_list[0]-60:Motion_trigger_list[-1]+120]
-    # print(EMG_trigger_list[-1])
+    # print(EMG_trigger_list[0],EMG_trigger_list[-1],Motion_trigger_list[0],Motion_trigger_list[-1])
+    EMG_data = EMG_data[EMG_trigger_list[0]:EMG_trigger_list[-1]]
+    Motion_data = Motion_data[Motion_trigger_list[0]:Motion_trigger_list[-1]]
 
     # visual trigger of EMG and Motion
-    plt.subplot(2, 1, 1)
-    plt.plot(trigger1)
-    plt.scatter(EMG_trigger_list[0], 0, c='red')
-    plt.scatter(EMG_trigger_list[-1], 0, c='red')
-    plt.title('EMG Trigger ' + str(count))
-    plt.subplot(2, 1, 2)
-    plt.plot(trigger2)
-    plt.scatter(Motion_trigger_list[0], 0, c='red')
-    plt.scatter(Motion_trigger_list[-1], 0, c='red')
-    plt.title('Motion Trigger')
-    plt.show()
+    # plt.subplot(2, 1, 1)
+    # plt.plot(trigger1)
+    # plt.scatter(EMG_trigger_list[0], 0, c='red')
+    # plt.scatter(EMG_trigger_list[-1], 0, c='red')
+    # plt.title('EMG Trigger ' + str(count))
+    # plt.subplot(2, 1, 2)
+    # plt.plot(trigger2)
+    # plt.scatter(Motion_trigger_list[0], 0, c='red')
+    # plt.scatter(Motion_trigger_list[-1], 0, c='red')
+    # plt.title('Motion Trigger')
+    # plt.show()
+
+
 
     # EMG:1927HZ  Motion:120HZ  1927/120 = 16
     # resample Motion to 1000hz
@@ -84,7 +85,6 @@ def process(EMG_data, Motion_data, count):
     Time_data = np.array([[i / 1000.0 for i in range(EMG_processed_data.shape[1])]])
     EMG_processed_data = np.concatenate((EMG_processed_data, Time_data), axis=0)
     EMG_processed_data = np.rot90(EMG_processed_data, 3)
-    print(EMG_processed_data.shape)
 
     # Motion data interpolation
     x = np.linspace(0, len(Motion_data[:, 14]), len(Motion_data[:, 14]))
@@ -101,8 +101,7 @@ def process(EMG_data, Motion_data, count):
         Motion_processed_data = np.concatenate((Motion_processed_data, ynew), axis=0)
     Motion_processed_data = np.rot90(Motion_processed_data, 3)
     Motion_processed_data = Motion_processed_data[:EMG_processed_data.shape[0]]
-    # 0 is best 
-    # 1000 is 1 second
+    # if not 0, something may be wrong.
     print(Motion_processed_data.shape[0] - EMG_processed_data.shape[0])
 
     EMG_processed_data = EMG_processed_data[:Motion_processed_data.shape[0]]
@@ -126,7 +125,7 @@ def mkdir(path):
         return False
 
 if __name__ == "__main__":
-    FR_num = 10
+    FR_num = 13
     FR_folder = 'C:\\code\\EEG_Motion\\FR\\'
     mkdir(FR_folder)
     LR_folder = 'C:\\code\\EEG_Motion\\LR\\'
@@ -135,25 +134,29 @@ if __name__ == "__main__":
         # data belong to FR and LR
         for count in range(FR_num):
             EMG_data = loadEMG(EMG_folder[count])
+            print(EMG_folder[count])
             Motion_data = loadMotion((Motion_folder[count]))
+            print(Motion_folder[count])
             Merged_title = title()
             Merged_data = process(EMG_data, Motion_data, count)
             with open('C:\\code\\EEG_Motion\\FR\\EMG_Motion_FR' + str(count) + '.csv', 'w', newline='') as f:
                 f_csv = csv.writer(f)
                 f_csv.writerow(Merged_title)
                 f_csv.writerows(Merged_data)
-            print(str(count + 1) + ' of ' + str(len(EMG_folder)) + ' completed')
+            print('FR '+ str(count) + ' of ' + str(FR_num) + ' completed')
 
         for count in range(FR_num, len(EMG_folder)):
             EMG_data = loadEMG(EMG_folder[count])
+            print(EMG_folder[count])
             Motion_data = loadMotion((Motion_folder[count]))
+            print(Motion_folder[count])
             Merged_title = title()
             Merged_data = process(EMG_data, Motion_data, count)
             with open('C:\\code\\EEG_Motion\\LR\\EMG_Motion_LR' + str(count - FR_num) + '.csv', 'w', newline='') as f:
                 f_csv = csv.writer(f)
                 f_csv.writerow(Merged_title)
                 f_csv.writerows(Merged_data)
-            print(str(count + 1) + ' of ' + str(len(EMG_folder)) + ' completed')
+            print('LR ' + str(count - FR_num) + ' of ' + str(len(EMG_folder) - FR_num) + ' completed')
     else:
         print('EMG files number is not equal to Motion files number.')
 
