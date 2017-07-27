@@ -1,5 +1,5 @@
 clear;
-num_choose = '05';
+num_choose = '16';
 pre_str = strcat('C:\data\pro_data2\s',num_choose,'\LR\');
 aft_str = strcat('C:\data\pro_data2\s',num_choose,'_2\LR\');
 Files = dir(pre_str);
@@ -16,7 +16,7 @@ for i = 3:LengthFiles;
     diffx = diff(Filter_LowPass(x,10,20,fs));
     diffy = diff(Filter_LowPass(y,10,20,fs));
     pre_velxy = sqrt((diffx.^2+diffy.^2))*fs;
-    [max_v,position] = max(pre_velxy);
+    [max_v,position] = max(pre_velxy(1:length(pre_velxy)-500));
     mid_velxy = pre_velxy(position-mid:length(pre_velxy));
     IniNum = find(mid_velxy > 0.1 * max_v);
     start = IniNum(1);
